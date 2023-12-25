@@ -181,7 +181,7 @@ func (db *DB) AddOrder(login, order string) error {
 	db.loggerPsql.Infow("Add new order")
 
 	db.loggerPsql.Infow("Create sql string")
-	sql := "INSERT INTO Orders(id_user, Number, Status, Accrual, Uploaded_at) SELECT u.id, $2,'NEW', 10, $3 " +
+	sql := "INSERT INTO Orders(id_user, Number, Status, Accrual, Uploaded_at) SELECT u.id, $2,'NEW', 0, $3 " +
 		"FROM Users as u WHERE u.Login=$1;"
 
 	db.loggerPsql.Infow("Create sql context")
