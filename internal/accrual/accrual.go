@@ -55,6 +55,6 @@ func (s *SystemAccrual) Start() {
 
 		wg.Wait()
 		s.log.Infow("All data update")
-		time.Sleep(10 * time.Second)
+		time.Sleep(20 * time.Second)
 	}
 }
