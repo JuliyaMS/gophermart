@@ -25,7 +25,7 @@ func send(number string) (*Response, error) {
 	client := http.Client{}
 	var resp Response
 
-	URL := fmt.Sprintf("http://%s/api/orders/%s", config.AccrualURL, number)
+	URL := fmt.Sprintf("%s/api/orders/%s", config.AccrualURL, number)
 
 	log.Info("Send data to address: ", URL)
 	err := retry.Do(func() error {
