@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/JuliyaMS/gophermart/internal/json"
 	"github.com/JuliyaMS/gophermart/internal/storage"
 	"go.uber.org/zap"
@@ -125,6 +126,7 @@ func (h *Handlers) login(w http.ResponseWriter, r *http.Request) {
 	h.loggerHandlers.Infow("Password is correct")
 
 	h.loggerHandlers.Infow("Set cookie")
+	fmt.Println(auth.Login)
 	cookie := h.createCookie(auth.Login, "/api/user/login")
 	http.SetCookie(w, &cookie)
 
@@ -143,7 +145,7 @@ func (h *Handlers) loadOrders(w http.ResponseWriter, r *http.Request) {
 	h.loggerHandlers.Infow("loadOrders: Get cookie...")
 	cookie, err := r.Cookie("UserAuthentication")
 	if err != nil {
-		h.loggerHandlers.Infow("User not authenticated")
+		h.loggerHandlers.Error("User not authenticated ", err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -209,7 +211,7 @@ func (h *Handlers) getOrders(w http.ResponseWriter, r *http.Request) {
 	h.loggerHandlers.Infow("getOrders: Get cookie...")
 	cookie, err := r.Cookie("UserAuthentication")
 	if err != nil {
-		h.loggerHandlers.Infow("User not unauthorized")
+		h.loggerHandlers.Error("User not authenticated ", err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
