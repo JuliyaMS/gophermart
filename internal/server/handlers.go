@@ -235,6 +235,9 @@ func (h *Handlers) getOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	h.loggerHandlers.Infow("Encode data orders")
 	err = json.Encode(orders, w)
 	if err != nil {
@@ -242,8 +245,7 @@ func (h *Handlers) getOrders(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+
 }
 
 func (h *Handlers) getBalance(w http.ResponseWriter, r *http.Request) {
@@ -278,6 +280,9 @@ func (h *Handlers) getBalance(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	h.loggerHandlers.Infow("Encode data orders")
 	err = json.Encode(balance, w)
 	if err != nil {
@@ -285,8 +290,6 @@ func (h *Handlers) getBalance(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handlers) balanceWithdraw(w http.ResponseWriter, r *http.Request) {
@@ -388,6 +391,9 @@ func (h *Handlers) infoWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
 	h.loggerHandlers.Infow("Encode data orders")
 	err = json.Encode(withdraws, w)
 	if err != nil {
@@ -395,6 +401,5 @@ func (h *Handlers) infoWithdraw(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+
 }
