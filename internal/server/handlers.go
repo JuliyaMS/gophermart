@@ -38,7 +38,6 @@ func (h *Handlers) createCookie(value, path string) http.Cookie {
 		Value:    value,
 		Path:     path,
 		HttpOnly: true,
-		Secure:   true,
 	}
 	return cookie
 }
@@ -76,7 +75,7 @@ func (h *Handlers) registration(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.loggerHandlers.Infow("Set cookie")
-	cookie := h.createCookie(auth.Login, "/api/user/orders")
+	cookie := h.createCookie(auth.Login, "/")
 	http.SetCookie(w, &cookie)
 
 	w.WriteHeader(http.StatusOK)
@@ -125,7 +124,7 @@ func (h *Handlers) login(w http.ResponseWriter, r *http.Request) {
 	h.loggerHandlers.Infow("Password is correct")
 
 	h.loggerHandlers.Infow("Set cookie")
-	cookie := h.createCookie(auth.Login, "/api/user/orders")
+	cookie := h.createCookie(auth.Login, "/")
 	http.SetCookie(w, &cookie)
 
 	w.WriteHeader(http.StatusOK)
