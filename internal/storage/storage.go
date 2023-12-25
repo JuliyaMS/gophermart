@@ -23,6 +23,7 @@ type Storager interface {
 	GetBalance(login string) (json.Balance, error)
 	AddWithdraw(login, order string, sum float64) error
 	GetWithdraws(login string) ([]json.Withdrawal, error)
+	Close() error
 }
 
 type DB struct {
@@ -353,4 +354,9 @@ func (db *DB) GetWithdraws(login string) ([]json.Withdrawal, error) {
 
 	db.loggerPsql.Infow("Get all withdraws successful")
 	return orders, nil
+}
+
+func (db *DB) Close() error {
+	err := db.conn.Close(context.Background())
+	return err
 }

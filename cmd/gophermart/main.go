@@ -23,6 +23,8 @@ func main() {
 	acc := accrual.NewSystemAccrual(lg, 3)
 	go acc.Start()
 
+	defer router.Close()
+
 	lg.Infow("Create new server")
 	s := server.NewServer(lg, router)
 	s.Start()
