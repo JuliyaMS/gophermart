@@ -9,13 +9,13 @@ import (
 
 type SystemAccrual struct {
 	sem  *Semaphore
-	conn *DbAccrual
+	conn *DBAccrual
 	log  *zap.SugaredLogger
 }
 
 func NewSystemAccrual(logger *zap.SugaredLogger, maxSem int) *SystemAccrual {
 	sem := NewSemaphore(maxSem)
-	conn, err := NewConnectionDbAccrual()
+	conn, err := NewConnectionDBAccrual()
 	if err != nil {
 		logger.Error("Get error while connection to database:", err)
 		return nil

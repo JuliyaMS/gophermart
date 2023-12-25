@@ -1,6 +1,6 @@
 package storage
 
-func GetSql(name string) string {
+func GetSQL(name string) string {
 	var sql string
 	switch n := name; n {
 	case "Init":

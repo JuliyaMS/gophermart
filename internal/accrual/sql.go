@@ -7,12 +7,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type DbAccrual struct {
+type DBAccrual struct {
 	conn  *pgxpool.Pool
 	limit int
 }
 
-func NewConnectionDbAccrual() (*DbAccrual, error) {
+func NewConnectionDBAccrual() (*DBAccrual, error) {
 	if config.DatabaseURI == "" {
 		return nil, errors.New("DatabaseURI is empty")
 	}
@@ -22,13 +22,13 @@ func NewConnectionDbAccrual() (*DbAccrual, error) {
 		return nil, err
 	}
 
-	return &DbAccrual{
+	return &DBAccrual{
 		conn:  conn,
 		limit: 10,
 	}, nil
 }
 
-func (db *DbAccrual) GetNeedOrders() ([]string, error) {
+func (db *DBAccrual) GetNeedOrders() ([]string, error) {
 	sql := "SELECT o.Number FROM Orders AS o WHERE o.Status IN ('NEW','PROCESSING') ORDER BY o.Uploaded_at ASC LIMIT $1;"
 
 	var orders []string
@@ -53,7 +53,7 @@ func (db *DbAccrual) GetNeedOrders() ([]string, error) {
 	return orders, nil
 }
 
-func (db *DbAccrual) UpdateOrders(resp *Response) error {
+func (db *DBAccrual) UpdateOrders(resp *Response) error {
 	sql := "UPDATE Orders SET Status = $1, Accrual=$2 WHERE Number = $3;"
 
 	_, errEx := db.conn.Exec(context.Background(), sql, resp.Status, resp.Accrual, resp.Order)
