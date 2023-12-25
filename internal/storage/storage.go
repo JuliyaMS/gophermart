@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/JuliyaMS/gophermart/internal/config"
-	"github.com/JuliyaMS/gophermart/internal/json"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 	"sort"
@@ -19,10 +18,10 @@ type Storager interface {
 	CheckPassword(user string) (string, error)
 	CheckOrder(number string) (string, error)
 	AddOrder(login, order string) error
-	GetOrders(login string) ([]json.Order, error)
-	GetBalance(login string) (json.Balance, error)
+	GetOrders(login string) ([]Order, error)
+	GetBalance(login string) (Balance, error)
 	AddWithdraw(login, order string, sum float64) error
-	GetWithdraws(login string) ([]json.Withdrawal, error)
+	GetWithdraws(login string) ([]Withdrawal, error)
 	Close() error
 }
 
@@ -200,10 +199,10 @@ func (db *DB) AddOrder(login, order string) error {
 	return nil
 }
 
-func (db *DB) GetOrders(login string) ([]json.Order, error) {
+func (db *DB) GetOrders(login string) ([]Order, error) {
 	db.loggerPsql.Info("Get all orders for user:", login)
 
-	var orders []json.Order
+	var orders []Order
 
 	db.loggerPsql.Infow("Create sql string")
 	sql := "SELECT o.Number, o.Status, o.Accrual, o.Uploaded_at FROM Orders AS o " +
@@ -235,7 +234,7 @@ func (db *DB) GetOrders(login string) ([]json.Order, error) {
 		if err != nil {
 			return nil, err
 		}
-		orders = append(orders, json.Order{Number: number, Status: status, Accrual: accrual, UploadedAt: dt})
+		orders = append(orders, Order{Number: number, Status: status, Accrual: accrual, UploadedAt: dt})
 	}
 
 	sort.Slice(orders, func(i, j int) bool {
@@ -246,7 +245,7 @@ func (db *DB) GetOrders(login string) ([]json.Order, error) {
 	return orders, nil
 }
 
-func (db *DB) GetBalance(login string) (json.Balance, error) {
+func (db *DB) GetBalance(login string) (Balance, error) {
 	db.loggerPsql.Info("Get balance for user:", login)
 
 	db.loggerPsql.Infow("Create sql string")
@@ -270,7 +269,7 @@ func (db *DB) GetBalance(login string) (json.Balance, error) {
 
 	if err := rowCurrent.Scan(&sum); err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			return json.Balance{}, err
+			return Balance{}, err
 		}
 		sum = 0
 	}
@@ -280,12 +279,12 @@ func (db *DB) GetBalance(login string) (json.Balance, error) {
 
 	if err := rowWithdrawn.Scan(&withdrawn); err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			return json.Balance{}, err
+			return Balance{}, err
 		}
 		withdrawn = 0
 	}
 
-	return json.Balance{Current: sum - withdrawn, Withdrawn: withdrawn}, nil
+	return Balance{Current: sum - withdrawn, Withdrawn: withdrawn}, nil
 
 }
 
@@ -311,10 +310,10 @@ func (db *DB) AddWithdraw(login, order string, sum float64) error {
 	return nil
 }
 
-func (db *DB) GetWithdraws(login string) ([]json.Withdrawal, error) {
+func (db *DB) GetWithdraws(login string) ([]Withdrawal, error) {
 	db.loggerPsql.Info("Get all withdraws for user:", login)
 
-	var orders []json.Withdrawal
+	var orders []Withdrawal
 
 	db.loggerPsql.Infow("Create sql string")
 	sql := "SELECT w.Number, w.Withdraw, w.Uploaded_at FROM Withdrawals AS w " +
@@ -345,7 +344,7 @@ func (db *DB) GetWithdraws(login string) ([]json.Withdrawal, error) {
 		if err != nil {
 			return nil, err
 		}
-		orders = append(orders, json.Withdrawal{Order: number, Sum: sum, ProcessedAt: dt})
+		orders = append(orders, Withdrawal{Order: number, Sum: sum, ProcessedAt: dt})
 	}
 
 	sort.Slice(orders, func(i, j int) bool {

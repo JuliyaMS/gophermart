@@ -1,7 +1,6 @@
 package accrual
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -33,7 +32,8 @@ func (s *SystemAccrual) Start() {
 		if err != nil {
 			s.log.Error("Get error while connection get need orders:", err)
 		}
-		fmt.Println(orders)
+		s.log.Info("Getting data: ", orders)
+
 		for idx := 0; idx < len(orders); idx++ {
 			wg.Add(1)
 			go func(taskID int) {
@@ -41,11 +41,13 @@ func (s *SystemAccrual) Start() {
 				defer wg.Done()
 				defer s.sem.Release()
 				s.log.Info("Run goroutine:", taskID)
+				s.log.Infow("Send data to system accrual")
 				resp, errResp := send(orders[taskID])
 				if errResp != nil {
 					s.log.Error("Get error while send Get request to system accrual: ", err)
 				}
-				fmt.Println(resp)
+
+				s.log.Infow("Update data in Database")
 				if errUpd := s.conn.UpdateOrders(resp); errUpd != nil {
 					s.log.Error("Get error while update orders: ", errUpd)
 				}
@@ -57,4 +59,8 @@ func (s *SystemAccrual) Start() {
 		s.log.Infow("All data update")
 		time.Sleep(15 * time.Second)
 	}
+}
+
+func (s *SystemAccrual) Close() {
+	s.conn.Close()
 }

@@ -63,3 +63,7 @@ func (db *DBAccrual) UpdateOrders(resp *Response) error {
 	}
 	return nil
 }
+
+func (db *DBAccrual) Close() {
+	db.conn.Close()
+}

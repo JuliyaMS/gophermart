@@ -24,6 +24,7 @@ func main() {
 	go acc.Start()
 
 	defer router.Close()
+	defer acc.Close()
 
 	lg.Infow("Create new server")
 	s := server.NewServer(lg, router)

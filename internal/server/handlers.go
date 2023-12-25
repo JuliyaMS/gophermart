@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/JuliyaMS/gophermart/internal/json"
 	"github.com/JuliyaMS/gophermart/internal/storage"
 	"go.uber.org/zap"
 	"io"
@@ -51,10 +50,10 @@ func (h *Handlers) registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var auth json.AuthData
+	var auth storage.AuthData
 
 	h.loggerHandlers.Infow("Decode body")
-	if err := json.Decode(&auth, r.Body); err != nil {
+	if err := storage.Decode(&auth, r.Body); err != nil {
 		h.loggerHandlers.Error("Get error while decode data: ", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -90,10 +89,10 @@ func (h *Handlers) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var auth json.AuthData
+	var auth storage.AuthData
 
 	h.loggerHandlers.Infow("Decode body")
-	if err := json.Decode(&auth, r.Body); err != nil {
+	if err := storage.Decode(&auth, r.Body); err != nil {
 		h.loggerHandlers.Error("Get error while decode data: ", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -141,7 +140,7 @@ func (h *Handlers) loadOrders(w http.ResponseWriter, r *http.Request) {
 
 	h.loggerHandlers.Infow("loadOrders: Get cookie...")
 	cookie, err := r.Cookie("UserAuthentication")
-	h.loggerHandlers.Infow("Cookies", r.Cookies())
+
 	if err != nil {
 		h.loggerHandlers.Error("User not authenticated ", err.Error())
 		w.WriteHeader(http.StatusUnauthorized)
@@ -239,7 +238,7 @@ func (h *Handlers) getOrders(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	h.loggerHandlers.Infow("Encode data orders")
-	err = json.Encode(orders, w)
+	err = storage.Encode(orders, w)
 	if err != nil {
 		h.loggerHandlers.Error("Get error while encode data: ", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -284,7 +283,7 @@ func (h *Handlers) getBalance(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	h.loggerHandlers.Infow("Encode data orders")
-	err = json.Encode(balance, w)
+	err = storage.Encode(balance, w)
 	if err != nil {
 		h.loggerHandlers.Error("Get error while encode data: ", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
@@ -315,10 +314,10 @@ func (h *Handlers) balanceWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var wr json.Withdrawal
+	var wr storage.Withdrawal
 
 	h.loggerHandlers.Infow("Decode body")
-	if err = json.Decode(&wr, r.Body); err != nil {
+	if err = storage.Decode(&wr, r.Body); err != nil {
 		h.loggerHandlers.Error("Get error while decode data: ", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -395,7 +394,7 @@ func (h *Handlers) infoWithdraw(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	h.loggerHandlers.Infow("Encode data orders")
-	err = json.Encode(withdraws, w)
+	err = storage.Encode(withdraws, w)
 	if err != nil {
 		h.loggerHandlers.Error("Get error while encode data: ", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
