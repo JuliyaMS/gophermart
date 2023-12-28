@@ -34,7 +34,7 @@ func main() {
 	router := server.NewRouter(handlers)
 
 	lg.Infow("Create new accrual system")
-	acc := accrual.NewSystemAccrual(lg, 3)
+	acc := accrual.NewSystemAccrual(conn, lg, 3)
 	go acc.Start()
 
 	lg.Infow("Create new server")
