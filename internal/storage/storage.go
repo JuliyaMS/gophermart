@@ -3,8 +3,8 @@ package storage
 import (
 	"context"
 	"errors"
-	"github.com/JuliyaMS/gophermart/internal/config"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"sort"
 	"time"
@@ -22,32 +22,14 @@ type Storager interface {
 	GetBalance(login string) (Balance, error)
 	AddWithdraw(login, order string, sum float64) error
 	GetWithdraws(login string) ([]Withdrawal, error)
-	Close() error
 }
 
 type DB struct {
-	conn       *pgx.Conn
+	conn       *pgxpool.Pool
 	loggerPsql *zap.SugaredLogger
 }
 
-func NewConnectionDB(logger *zap.SugaredLogger) *DB {
-	if config.DatabaseURI == "" {
-		return nil
-	}
-
-	logger.Infow("Create context with timeout")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	logger.Infow("Connect to Database...")
-	conn, err := pgx.Connect(ctx, config.DatabaseURI)
-	if err != nil {
-		logger.Error("Get error while connection to database:", err)
-		return nil
-	}
-
-	logger.Infow("Success to create connection")
+func NewConnectionDB(conn *pgxpool.Pool, logger *zap.SugaredLogger) *DB {
 	return &DB{
 		conn:       conn,
 		loggerPsql: logger,
@@ -346,9 +328,4 @@ func (db *DB) GetWithdraws(login string) ([]Withdrawal, error) {
 
 	db.loggerPsql.Infow("Get all withdraws successful")
 	return orders, nil
-}
-
-func (db *DB) Close() error {
-	err := db.conn.Close(context.Background())
-	return err
 }

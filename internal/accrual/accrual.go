@@ -1,6 +1,7 @@
 package accrual
 
 import (
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -12,9 +13,9 @@ type SystemAccrual struct {
 	log  *zap.SugaredLogger
 }
 
-func NewSystemAccrual(logger *zap.SugaredLogger, maxSem int) *SystemAccrual {
+func NewSystemAccrual(pool *pgxpool.Pool, logger *zap.SugaredLogger, maxSem int) *SystemAccrual {
 	sem := NewSemaphore(maxSem)
-	conn, err := NewConnectionDBAccrual()
+	conn, err := NewConnectionDBAccrual(pool)
 	if err != nil {
 		logger.Error("Get error while connection to database:", err)
 		return nil

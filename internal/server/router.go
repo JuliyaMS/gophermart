@@ -30,7 +30,3 @@ func NewRouter(h *Handlers) *Router {
 func (ro *Router) GetRouter() *chi.Mux {
 	return ro.r
 }
-
-func (ro *Router) Close() error {
-	return ro.h.dataStore.Close()
-}

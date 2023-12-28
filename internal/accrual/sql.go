@@ -2,8 +2,6 @@ package accrual
 
 import (
 	"context"
-	"errors"
-	"github.com/JuliyaMS/gophermart/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,16 +10,7 @@ type DBAccrual struct {
 	limit int
 }
 
-func NewConnectionDBAccrual() (*DBAccrual, error) {
-	if config.DatabaseURI == "" {
-		return nil, errors.New("DatabaseURI is empty")
-	}
-
-	conn, err := pgxpool.New(context.Background(), config.DatabaseURI)
-	if err != nil {
-		return nil, err
-	}
-
+func NewConnectionDBAccrual(conn *pgxpool.Pool) (*DBAccrual, error) {
 	return &DBAccrual{
 		conn:  conn,
 		limit: 10,

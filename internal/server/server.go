@@ -31,7 +31,3 @@ func (s *Server) Start() {
 
 	}
 }
-
-func (s *Server) Close() error {
-	return s.r.Close()
-}

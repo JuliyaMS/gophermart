@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"github.com/JuliyaMS/gophermart/internal/accrual"
 	"github.com/JuliyaMS/gophermart/internal/config"
 	"github.com/JuliyaMS/gophermart/internal/logger"
 	"github.com/JuliyaMS/gophermart/internal/server"
 	"github.com/JuliyaMS/gophermart/internal/storage"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -14,8 +16,16 @@ func main() {
 	lg.Infow("Get server config")
 	config.GetServerConfig()
 
+	lg.Infow("Create connection to database")
+	conn, err := pgxpool.New(context.Background(), config.DatabaseURI)
+	if err != nil {
+		lg.Error("Get error while create connection to database: ", err)
+	}
+
+	defer conn.Close()
+
 	lg.Infow("Get connection to database")
-	storageDB := storage.NewConnectionDB(lg)
+	storageDB := storage.NewConnectionDB(conn, lg)
 
 	lg.Infow("Create new handlers")
 	handlers := server.NewHandlers(lg, storageDB)
@@ -26,9 +36,6 @@ func main() {
 	lg.Infow("Create new accrual system")
 	acc := accrual.NewSystemAccrual(lg, 3)
 	go acc.Start()
-
-	defer router.Close()
-	defer acc.Close()
 
 	lg.Infow("Create new server")
 	s := server.NewServer(lg, router)
