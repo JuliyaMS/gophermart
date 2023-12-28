@@ -34,15 +34,14 @@ func send(number string) (*Response, error) {
 				errResp error
 			)
 			defer res.Body.Close()
-			if res.StatusCode == http.StatusOK {
-				if data, errResp = io.ReadAll(res.Body); errResp != nil {
-					return errResp
-				}
-				if errResp = json.Unmarshal(data, &resp); errResp != nil {
-					return errResp
-				}
-			} else {
+			if res.StatusCode != http.StatusOK {
 				return errors.New("status code is not OK")
+			}
+			if data, errResp = io.ReadAll(res.Body); errResp != nil {
+				return errResp
+			}
+			if errResp = json.Unmarshal(data, &resp); errResp != nil {
+				return errResp
 			}
 		}
 		return er

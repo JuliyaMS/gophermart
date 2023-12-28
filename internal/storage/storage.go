@@ -37,7 +37,7 @@ func NewConnectionDB(logger *zap.SugaredLogger) *DB {
 
 	logger.Infow("Create context with timeout")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	logger.Infow("Connect to Database...")
@@ -56,7 +56,7 @@ func NewConnectionDB(logger *zap.SugaredLogger) *DB {
 
 func (db *DB) CheckConnection() error {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	db.loggerPsql.Infow("Check connection to Database")
@@ -72,14 +72,13 @@ func (db *DB) Init() error {
 
 	db.loggerPsql.Infow("Start creation tables for metrics")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
-	sql := "CREATE TABLE IF NOT EXISTS Users(id SERIAL PRIMARY KEY, Login varchar(100) NOT NULL, Password varchar(100) NOT NULL);"
-	sql += "CREATE TABLE IF NOT EXISTS Orders(id SERIAL PRIMARY KEY, id_user SERIAL, Number varchar(100) NOT NULL, " +
-		"Status varchar(100) NOT NULL, Accrual double precision, Uploaded_at TIMESTAMP NOT NULL);"
-	sql += "CREATE TABLE IF NOT EXISTS Withdrawals(id SERIAL PRIMARY KEY, id_user SERIAL, Number varchar(100) NOT NULL, " +
-		"Withdraw double precision NOT NULL, Uploaded_at TIMESTAMP NOT NULL);"
+	sql := `CREATE TABLE IF NOT EXISTS Users(id SERIAL PRIMARY KEY, Login varchar(100) NOT NULL, Password varchar(100) NOT NULL);
+			CREATE TABLE IF NOT EXISTS Orders(id SERIAL PRIMARY KEY, id_user SERIAL, Number varchar(100) NOT NULL,Status varchar(100) NOT NULL, Accrual double precision, Uploaded_at TIMESTAMP NOT NULL);
+			CREATE TABLE IF NOT EXISTS Withdrawals(id SERIAL PRIMARY KEY, id_user SERIAL, Number varchar(100) NOT NULL,Withdraw double precision NOT NULL, Uploaded_at TIMESTAMP NOT NULL);
+		   `
 
 	_, errEx := db.conn.Exec(ctx, sql)
 
@@ -94,11 +93,11 @@ func (db *DB) Init() error {
 func (db *DB) CheckUser(user string) error {
 	db.loggerPsql.Infow("Check user in table users")
 
-	db.loggerPsql.Infow("Create sql string")
+	db.loggerPsql.Debug("Create sql string")
 	sql := "SELECT Login FROM Users WHERE Login= $1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to check user")
@@ -116,11 +115,11 @@ func (db *DB) CheckUser(user string) error {
 func (db *DB) AddUser(user, password string) error {
 	db.loggerPsql.Infow("Add new user if login not exist")
 
-	db.loggerPsql.Infow("Create sql string")
+	db.loggerPsql.Debug("Create sql string")
 	sql := "INSERT INTO Users(Login, Password) VALUES ($1, $2);"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to add user")
@@ -137,11 +136,11 @@ func (db *DB) AddUser(user, password string) error {
 func (db *DB) CheckPassword(user string) (string, error) {
 	db.loggerPsql.Infow("Check user and password in table users")
 
-	db.loggerPsql.Infow("Create sql string")
+	db.loggerPsql.Debug("Create sql string")
 	sql := "SELECT Password FROM Users WHERE Login= $1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to check password")
@@ -159,11 +158,11 @@ func (db *DB) CheckPassword(user string) (string, error) {
 func (db *DB) CheckOrder(number string) (string, error) {
 	db.loggerPsql.Infow("Check order in table Orders")
 
-	db.loggerPsql.Infow("Create sql string")
+	db.loggerPsql.Debug("Create sql string")
 	sql := "SELECT u.Login FROM Orders AS o INNER JOIN Users AS u ON u.id=o.id_user WHERE o.Number= $1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to check order")
@@ -180,12 +179,11 @@ func (db *DB) CheckOrder(number string) (string, error) {
 func (db *DB) AddOrder(login, order string) error {
 	db.loggerPsql.Infow("Add new order")
 
-	db.loggerPsql.Infow("Create sql string")
-	sql := "INSERT INTO Orders(id_user, Number, Status, Accrual, Uploaded_at) SELECT u.id, $2,'NEW', 0, $3 " +
-		"FROM Users as u WHERE u.Login=$1;"
+	db.loggerPsql.Debug("Create sql string")
+	sql := "INSERT INTO Orders(id_user, Number, Status, Accrual, Uploaded_at) SELECT u.id, $2,'NEW', 0, $3 FROM Users as u WHERE u.Login=$1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to add order")
@@ -204,12 +202,11 @@ func (db *DB) GetOrders(login string) ([]Order, error) {
 
 	var orders []Order
 
-	db.loggerPsql.Infow("Create sql string")
-	sql := "SELECT o.Number, o.Status, o.Accrual, o.Uploaded_at FROM Orders AS o " +
-		"INNER JOIN Users AS u ON u.id=o.id_user WHERE u.Login= $1;"
+	db.loggerPsql.Debug("Create sql string")
+	sql := "SELECT o.Number, o.Status, o.Accrual, o.Uploaded_at FROM Orders AS o INNER JOIN Users AS u ON u.id=o.id_user WHERE u.Login= $1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to get orders")
@@ -248,15 +245,13 @@ func (db *DB) GetOrders(login string) ([]Order, error) {
 func (db *DB) GetBalance(login string) (Balance, error) {
 	db.loggerPsql.Info("Get balance for user:", login)
 
-	db.loggerPsql.Infow("Create sql string")
-	sqlCurrent := "SELECT SUM(o.Accrual) FROM Orders AS o " +
-		"INNER JOIN Users AS u ON u.id=o.id_user WHERE u.Login= $1 GROUP BY o.id_user;"
+	db.loggerPsql.Debug("Create sql string")
+	sqlCurrent := "SELECT SUM(o.Accrual) FROM Orders AS o INNER JOIN Users AS u ON u.id=o.id_user WHERE u.Login= $1 GROUP BY o.id_user;"
 
-	sqlWithdrawn := "SELECT SUM(w.Withdraw) FROM Withdrawals AS w " +
-		"INNER JOIN Users AS u ON u.id=w.id_user WHERE u.Login= $1 GROUP BY w.id_user;"
+	sqlWithdrawn := "SELECT SUM(w.Withdraw) FROM Withdrawals AS w INNER JOIN Users AS u ON u.id=w.id_user WHERE u.Login= $1 GROUP BY w.id_user;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	var (
@@ -291,12 +286,11 @@ func (db *DB) GetBalance(login string) (Balance, error) {
 func (db *DB) AddWithdraw(login, order string, sum float64) error {
 	db.loggerPsql.Infow("Add new withdraw")
 
-	db.loggerPsql.Infow("Create sql string")
-	sql := "INSERT INTO Withdrawals(id_user, Number, Withdraw, Uploaded_at) SELECT u.id, $2, $3, $4 " +
-		"FROM Users as u WHERE u.Login=$1;"
+	db.loggerPsql.Debug("Create sql string")
+	sql := "INSERT INTO Withdrawals(id_user, Number, Withdraw, Uploaded_at) SELECT u.id, $2, $3, $4 FROM Users as u WHERE u.Login=$1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to add withdraw")
@@ -315,12 +309,11 @@ func (db *DB) GetWithdraws(login string) ([]Withdrawal, error) {
 
 	var orders []Withdrawal
 
-	db.loggerPsql.Infow("Create sql string")
-	sql := "SELECT w.Number, w.Withdraw, w.Uploaded_at FROM Withdrawals AS w " +
-		"INNER JOIN Users AS u ON u.id=w.id_user WHERE u.Login= $1;"
+	db.loggerPsql.Debug("Create sql string")
+	sql := "SELECT w.Number, w.Withdraw, w.Uploaded_at FROM Withdrawals AS w INNER JOIN Users AS u ON u.id=w.id_user WHERE u.Login= $1;"
 
-	db.loggerPsql.Infow("Create sql context")
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*200)
+	db.loggerPsql.Debug("Create sql context")
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
 	defer cancel()
 
 	db.loggerPsql.Infow("Execute request to get withdraws")

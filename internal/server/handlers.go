@@ -12,9 +12,7 @@ type Handlers struct {
 	loggerHandlers *zap.SugaredLogger
 }
 
-func NewHandlers(logger *zap.SugaredLogger) *Handlers {
-
-	storageDB := storage.NewConnectionDB(logger)
+func NewHandlers(logger *zap.SugaredLogger, storageDB storage.Storager) *Handlers {
 
 	err := storageDB.CheckConnection()
 	if err != nil {
@@ -29,16 +27,6 @@ func NewHandlers(logger *zap.SugaredLogger) *Handlers {
 	}
 
 	return &Handlers{dataStore: storageDB, loggerHandlers: logger}
-}
-
-func (h *Handlers) createCookie(value, path string) http.Cookie {
-	cookie := http.Cookie{
-		Name:     "UserAuthentication",
-		Value:    value,
-		Path:     path,
-		HttpOnly: true,
-	}
-	return cookie
 }
 
 func (h *Handlers) registration(w http.ResponseWriter, r *http.Request) {
@@ -73,8 +61,13 @@ func (h *Handlers) registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.loggerHandlers.Infow("Set cookie")
-	cookie := h.createCookie(auth.Login, "/")
+	h.loggerHandlers.Debugw("Set cookie")
+	cookie := http.Cookie{
+		Name:     "UserAuthentication",
+		Value:    auth.Login,
+		Path:     "/",
+		HttpOnly: true,
+	}
 	http.SetCookie(w, &cookie)
 
 	w.WriteHeader(http.StatusOK)
@@ -122,8 +115,13 @@ func (h *Handlers) login(w http.ResponseWriter, r *http.Request) {
 	}
 	h.loggerHandlers.Infow("Password is correct")
 
-	h.loggerHandlers.Infow("Set cookie")
-	cookie := h.createCookie(auth.Login, "/")
+	h.loggerHandlers.Debugw("Set cookie")
+	cookie := http.Cookie{
+		Name:     "UserAuthentication",
+		Value:    auth.Login,
+		Path:     "/",
+		HttpOnly: true,
+	}
 	http.SetCookie(w, &cookie)
 
 	w.WriteHeader(http.StatusOK)
